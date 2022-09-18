@@ -1,6 +1,6 @@
 use std::os::raw;
 
-use crate::utils::*;
+use crate::{structs::UrlWithQuery, utils::*};
 
 #[derive(Debug, Clone, Copy)]
 pub enum LogType {
@@ -18,11 +18,12 @@ impl LogType {
 }
 
 impl UrlWithQuery<Login> {
-    pub fn new() -> Result<Self, Error> {
-        Ok(Self(
-            Url::from_str("https://bbs.uestc.edu.cn/mobcent/app/web/index.php?r=user/login")?,
+    pub fn new() -> Self {
+        Self(
+            Url::from_str("https://bbs.uestc.edu.cn/mobcent/app/web/index.php?r=user/login")
+                .unwrap(),
             PhantomData,
-        ))
+        )
     }
 
     pub fn log_type(mut self, log_type: LogType) -> Self {
@@ -83,7 +84,7 @@ pub struct Credit {
 }
 
 impl Login {
-    pub fn new() -> Result<UrlWithQuery<Login>, Error> {
-        Ok(UrlWithQuery::<Login>::new()?)
+    pub fn build() -> UrlWithQuery<Login> {
+        UrlWithQuery::<Login>::new()
     }
 }

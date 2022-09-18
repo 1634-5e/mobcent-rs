@@ -1,19 +1,20 @@
-use crate::board::Board;
+use crate::structs::board::Board;
+use crate::structs::UrlWithQuery;
 use crate::utils::*;
 
 impl UrlWithQuery<ForumList> {
-    pub fn new() -> Result<Self, Error> {
-        Ok(Self(
-            Url::from_str("https://bbs.uestc.edu.cn/mobcent/app/web/index.php?r=forum/forumlist")?,
+    pub fn new() -> Self {
+        Self(
+            Url::from_str("https://bbs.uestc.edu.cn/mobcent/app/web/index.php?r=forum/forumlist")
+                .unwrap(), // 鸵鸟，主要是这里不应该提供一个？给用户，因为用户那边无显式出错点
             PhantomData,
-        ))
+        )
     }
 
     pub fn fid(mut self, fid: Id) -> Self {
         self.0
             .query_pairs_mut()
             .append_pair("fid", fid.to_string().as_str());
-        dbg!(&self.0);
         self
     }
 }
@@ -36,9 +37,17 @@ struct BoardCategory {
 }
 
 impl ForumList {
-    pub fn new() -> Result<UrlWithQuery<ForumList>, Error> {
-        Ok(UrlWithQuery::<ForumList>::new()?)
+    pub fn build() -> UrlWithQuery<ForumList> {
+        UrlWithQuery::<ForumList>::new()
     }
+}
+
+// FIXME:返回数据又变成空了（悲
+// 不过语法终于到了我想要的模样
+#[tokio::test]
+async fn foo() {
+    let res = ForumList::build().fetch().await;
+    dbg!(res);
 }
 
 // #[test]

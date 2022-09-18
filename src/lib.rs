@@ -2,12 +2,10 @@
 #![feature(never_type)]
 mod utils {
     pub mod constants;
-    pub mod helper_types;
-    pub mod type_alias;
+    pub mod types;
 
     pub use constants::*;
-    pub use helper_types::*;
-    pub use type_alias::*;
+    pub use types::*;
 }
 
 mod user {
@@ -23,4 +21,12 @@ mod forum {
     pub use forum_list::ForumList;
 }
 
-mod board;
+mod structs {
+    pub mod board;
+    pub mod command;
+    pub mod topic;
+
+    pub use board::Board;
+    pub use command::UrlWithQuery;
+    pub use topic::Topic;
+}

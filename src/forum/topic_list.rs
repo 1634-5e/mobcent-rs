@@ -1,5 +1,6 @@
+use crate::structs::board::Board;
+use crate::structs::{UrlWithQuery, Topic};
 use crate::utils::*;
-use crate::board::Board;
 
 #[derive(Debug, Clone, Copy)]
 pub enum SortBy {
@@ -29,6 +30,23 @@ impl SortBy {
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub enum FilterType {
+    #[serde(rename = "sortid")]
+    SortId,
+    #[serde(rename = "typeid")]
+    TypeId,
+}
+
+impl FilterType {
+    fn as_str(&self) -> &str {
+        match self {
+            FilterType::SortId => "sortid",
+            FilterType::TypeId => "typeid",
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+pub enum TopOrder {
     #[serde(rename = "0")]
     NoTopPosts,
     #[serde(rename = "1")]
@@ -38,41 +56,24 @@ pub enum FilterType {
     #[serde(rename = "3")]
     GlobalTopPosts,
 }
-
-impl FilterType {
-    fn as_str(&self) -> &str {
-        match self {
-            FilterType::NoTopPosts => "0",
-            FilterType::TopPosts => "1",
-            FilterType::FilteredTopPosts => "2",
-            FilterType::GlobalTopPosts => "3",
-        }
-    }
-}
-
-#[derive(Debug, Clone, Copy)]
-pub enum TopOrder {
-    // #[serde(rename = "sortid")]
-    SortId,
-    // #[serde(rename = "typeid")]
-    TypeId,
-}
-
 impl TopOrder {
     fn as_str(&self) -> &str {
         match self {
-            TopOrder::SortId => "sortid",
-            TopOrder::TypeId => "typeid",
+            TopOrder::NoTopPosts => "0",
+            TopOrder::TopPosts => "1",
+            TopOrder::FilteredTopPosts => "2",
+            TopOrder::GlobalTopPosts => "3",
         }
     }
 }
 
 impl UrlWithQuery<TopicList> {
-    pub fn new() -> Result<Self, Error> {
-        Ok(Self(
-            Url::from_str("https://bbs.uestc.edu.cn/mobcent/app/web/index.php?r=forum/topiclist")?,
+    pub fn new() -> Self {
+        Self(
+            Url::from_str("https://bbs.uestc.edu.cn/mobcent/app/web/index.php?r=forum/topiclist")
+                .unwrap(),
             PhantomData,
-        ))
+        )
     }
 
     pub fn board_id(mut self, board_id: Id) -> Self {
@@ -137,9 +138,9 @@ impl UrlWithQuery<TopicList> {
 pub struct TopicList {
     #[serde(flatten)]
     common_header: CommonHeader,
+    list: Vec<Topic>,
     #[serde(rename = "newTopicPanel")]
     new_topic_panel: Vec<NewTopicPanel>,
-    list: Vec<Board>,
     online_user_num: Number,
     td_visitors: Number,
 }
@@ -161,7 +162,13 @@ struct BoardCategory {
 }
 
 impl TopicList {
-    pub fn new() -> Result<UrlWithQuery<TopicList>, Error> {
-        Ok(UrlWithQuery::<TopicList>::new()?)
+    pub fn build() -> UrlWithQuery<TopicList> {
+        UrlWithQuery::<TopicList>::new()
     }
+}
+
+#[tokio::test]
+async fn foo() {
+    let res = TopicList::build().fetch().await;
+    dbg!(res);
 }
